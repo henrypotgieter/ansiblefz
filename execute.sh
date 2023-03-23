@@ -13,11 +13,11 @@ START_DIR=$PWD
 
 SOURCE=${BASH_SOURCE[0]}
 while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-  SOURCE=$(readlink "$SOURCE")
-  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+	DIR=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
+	SOURCE=$(readlink "$SOURCE")
+	[[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-SCRIPT_DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+SCRIPT_DIR=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
 
 # Go insto the script directory
 cd "$SCRIPT_DIR"
@@ -28,7 +28,7 @@ if [ -f ".env" ]; then
 	# Create a logfile name with timestamp
 	TIMESTAMP=$(date "+%Y-%m-%d_%H%M%S")
 	LOGDIR=$(sed -n 's/^LOG_DEST=\(.*\)/\1/p' <.env)
-	LOGFILE='${LOGDIR}ansible_execution_${TIMESTAMP}.log'
+	LOGFILE="${LOGDIR}ansible_execution_${TIMESTAMP}.log"
 
 	# Set the command to execute based on the output of ansiblefz python
 	EXEC_CMD=$(python3 -m ansiblefz)
@@ -38,13 +38,17 @@ if [ -f ".env" ]; then
 
 	# Execute the command
 	if [ $? -eq 0 ]; then
-		eval "unbuffer $EXEC_CMD | tee -a ${LOGFILE}"
+		eval "unbuffer ""$EXEC_CMD | tee -a ""$LOGFILE"
 	else
-		eval "$EXEC_CMD | tee -a ${LOGFILE}"
+		eval """$EXEC_CMD | tee -a ""$LOGFILE"
 	fi
 
 	# Change back to starting directory
 	cd "$START_DIR"
+
+	# Inform of logfile
+	printf 'Logfile Written: %s\n' "$LOGFILE"
+
 else
 	echo "ERROR! - No .env file exists yet!"
 	echo "Copy .env-example to .env and edit accordingly"
