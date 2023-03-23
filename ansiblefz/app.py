@@ -54,10 +54,11 @@ class Ansiblefz(object):
                 0,
             )
         else:
-            selected_user = self.fzfu(
+            selected_user = self.fzfs(
                 poss_users,
                 "Specify user?",
                 "CMD: " + cmd_prefix + cmd_args + " " + cmd_suffix,
+                0,
             )
 
         if not selected_user == "NONE":
