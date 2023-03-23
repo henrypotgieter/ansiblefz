@@ -1,5 +1,4 @@
 import os
-import subprocess
 import mysql.connector as mysql
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
@@ -23,7 +22,7 @@ class Ansiblefz(object):
         cmd_args = ""
 
         platform = self.categories()
-        platform_select = self.fzfc(platform, "Choose platform", "We will do it")
+        platform_select = self.fzfu(platform, "Choose platform", "We will do it")
 
         # platform_selections = " ".join(platform_select)
 
@@ -38,9 +37,33 @@ class Ansiblefz(object):
         filedata = self.filedata(actions_select[0])
         cmd_suffix += "/" + filedata[0]
 
-        if filedata[1]:
-            cmd_args += "-u " + filedata[1]
+        # Get the username we are running the script as
+        my_user = os.getlogin()
 
+        # Get the prefered username from SQL if defined
+        poss_users = []
+        poss_users.append(my_user)
+        poss_users.append("NONE")
+        if filedata[1]:
+            poss_users.append(filedata[1])
+            suggested = filedata[1]
+            selected_user = self.fzfs(
+                poss_users,
+                "Specify user? (suggested: " + suggested + ")",
+                "CMD: " + cmd_prefix + cmd_args + " " + cmd_suffix,
+                0,
+            )
+        else:
+            selected_user = self.fzfu(
+                poss_users,
+                "Specify user?",
+                "CMD: " + cmd_prefix + cmd_args + " " + cmd_suffix,
+            )
+
+        if not selected_user == "NONE":
+            cmd_args += "-u " + selected_user[0]
+
+        # Check if we are to become root or not
         becomeRoot = self.fzfs(
             ["YES", "NO"],
             "Become Root?",
@@ -56,11 +79,17 @@ class Ansiblefz(object):
         command = cmd_prefix + cmd_args + cmd_suffix
         print(command)
 
-        # subprocess.call(command.split())
-        #subprocess.check_output(command.split())
-
     def fzfc(self, selections, header, label):
         fzf_style = " --border=rounded --margin=10 --header-first --border-label-pos=15 --color=dark --inline-info"
+        options = (
+            "--header='" + header + "' --border-label=' " + label + " '" + fzf_style
+        )
+        inputdata = fzf.prompt(selections, options)
+        return inputdata
+
+    def fzfu(self, selections, header, label):
+        fzf_style = " --border=rounded --margin=30,10 --header-first --border-label-pos=15 --color=dark --inline-info"
+
         options = (
             "--header='" + header + "' --border-label=' " + label + " '" + fzf_style
         )

@@ -14,7 +14,7 @@ Source the `structure.sql` file to create the required tables within your MySQL 
 
 ## Getting Started
 
-Make sure to install your requirements as necesary:
+Make sure to install your requirements as necessary:
 
 ```
 pip3 install -r requirements.txt
