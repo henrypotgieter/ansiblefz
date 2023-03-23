@@ -1,4 +1,5 @@
 import os
+import subprocess
 import mysql.connector as mysql
 from pyfzf.pyfzf import FzfPrompt
 from dotenv import load_dotenv
@@ -41,8 +42,11 @@ class Ansiblefz(object):
             cmd_args += "-u " + filedata[1]
 
         becomeRoot = self.fzfs(
-                ["YES","NO"], "Become Root?", "CMD: " + cmd_prefix + cmd_args + ' ' + cmd_suffix, filedata[2]
-                )
+            ["YES", "NO"],
+            "Become Root?",
+            "CMD: " + cmd_prefix + cmd_args + " " + cmd_suffix,
+            filedata[2],
+        )
 
         if becomeRoot[0] == "YES":
             cmd_args += " -b -k -K "
@@ -50,8 +54,10 @@ class Ansiblefz(object):
             cmd_args += " "
 
         command = cmd_prefix + cmd_args + cmd_suffix
-
         print(command)
+
+        # subprocess.call(command.split())
+        #subprocess.check_output(command.split())
 
     def fzfc(self, selections, header, label):
         fzf_style = " --border=rounded --margin=10 --header-first --border-label-pos=15 --color=dark --inline-info"
