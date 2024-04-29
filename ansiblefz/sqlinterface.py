@@ -51,7 +51,7 @@ class Sqlconn(object):
         tuples = self.sql_read(
             "SELECT scriptname FROM scripts WHERE host_category = '"
             + host_category
-            + "'"
+            + "' and active = 1"
         )
 
         scriptnames = []
@@ -61,8 +61,23 @@ class Sqlconn(object):
 
     def filedata(self, scriptname):
         tuples = self.sql_read(
-            "SELECT filename, req_user, req_become FROM scripts WHERE scriptname = '"
-            + scriptname
-            + "'"
+            "SELECT filename FROM scripts WHERE scriptname = '" + scriptname + "'"
         )
         return list(tuples[0])
+
+    def category_desc(self, category_name):
+        tuples = self.sql_read(
+            "SELECT description FROM category WHERE host_category ='"
+            + category_name
+            + "'"
+        )
+        return tuples[0][0]
+
+    def script_desc(self, category_name, script_name):
+        tuples = self.sql_read(
+            "SELECT description FROM scripts WHERE host_category ='"
+            + category_name
+            + "' AND scriptname = "
+            + script_name
+        )
+        return tuples[0][0]
